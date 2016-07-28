@@ -27,6 +27,8 @@ tar -xf kibana-$KIBANA_VERSION-linux-x64.tar.gz -C $ROOTFS/opt/kibana --strip-co
 
 rm -rf $ROOTFS/opt/kibana/node $ROOTFS/opt/kibana/bin
 
+cp -r $SRC/etc $ROOTFS
+
 cd $ROOTFS
 tar -cf $OUT/rootfs.tar .
 
@@ -39,8 +41,6 @@ RUN apk add --no-cache nodejs
 
 ENV NODE_ENV=production
 
-USER nobody
-
 EXPOSE 5601
 
 WORKDIR /opt/kibana
@@ -48,3 +48,5 @@ WORKDIR /opt/kibana
 ENTRYPOINT ["/usr/bin/node", "src/cli"]
 
 EOF
+
+# USER nobody
