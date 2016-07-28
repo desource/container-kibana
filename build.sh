@@ -19,6 +19,7 @@ tar -xf rootfs.tar.gz -C $ROOTFS
 mv $ROOTFS/etc/localtime $ROOTFS/usr/share/zoneinfo
 ln -s /usr/share/zoneinfo $ROOTFS/etc/localtime 
 
+mkdir -p $ROOTFS/opt
 cd $BASE
 curl -sL https://download.elastic.co/kibana/kibana/kibana-$KIBANA_VERSION-linux-x64.tar.gz -o kibana-$KIBANA_VERSION-linux-x64.tar.gz
 echo "$KIBANA_SHA1  kibana-$KIBANA_VERSION-linux-x64.tar.gz" | sha1sum -c
