@@ -1,37 +1,30 @@
 #!/usr/bin/env sh
 set -eux
 
-HAPROXY_VERSION=1.6.7
-HAPROXY_SHA256=583e0c0c3388c0597dea241601f3fedfe1d7ff8c735d471831be67315f58183a
+KIBANA_VERSION=4.5.1
+KIBANA_SHA1=355c631b77c529d3dea304d7f084e658f5cc3123
 
 BASE=$PWD
 SRC=$PWD/src
-OUT=$PWD/haproxy-build
+OUT=$PWD/kibana-build
 ROOTFS=$PWD/rootfs
 
-mkdir -p $BASE/haproxy
-cd $BASE
-curl -OL http://www.haproxy.org/download/1.6/src/haproxy-$HAPROXY_VERSION.tar.gz
-echo "$HAPROXY_SHA256  haproxy-$HAPROXY_VERSION.tar.gz" | sha256sum -c
-tar -C $BASE/haproxy --strip-components 1 -xf haproxy-$HAPROXY_VERSION.tar.gz
-
-cd $BASE/haproxy
-make TARGET=linux2628 \
-       USE_TFO=1 \
-       CPU=native CPU_CFLAGS.native=-O3 \
-       USE_PCRE_JIT=1 \
-       ADDLIB="-static -L$BASE/libslz-build/lib" \
-       USE_SLZ=1 ADDINC=-I$BASE/libslz-build/include \
-       USE_LUA=yes LUA_LIB_NAME=lua LUA_LIB=$BASE/lua-build/lib LUA_INC=$BASE/lua-build/include \
-       USE_OPENSSL=1 SSL_LIB=$BASE/libressl-build/lib SSL_INC=$BASE/libressl-build/include
-
-mkdir -p $ROOTFS/bin $ROOTFS/var/run/haproxy
-
-cp -r $SRC/etc $ROOTFS
-
-cp haproxy haproxy-systemd-wrapper $ROOTFS/bin
-
 mkdir -p $OUT
+mkdir -p $ROOTFS
+
+curl -sL https://github.com/gliderlabs/docker-alpine/blob/rootfs/library-edge/versions/library-edge/rootfs.tar.gz?raw=true -o rootfs.tar.gz
+
+tar -xf rootfs.tar.gz -C $ROOTFS
+
+mv $ROOTFS/etc/localtime $ROOTFS/usr/share/zoneinfo
+ln -s /usr/share/zoneinfo $ROOTFS/etc/localtime 
+
+cd $BASE
+curl -sL https://download.elastic.co/kibana/kibana/kibana-$KIBANA_VERSION-linux-x64.tar.gz -o kibana-$KIBANA_VERSION-linux-x64.tar.gz
+echo "$KIBANA_SHA1  kibana-$KIBANA_VERSION-linux-x64.tar.gz" | sha1sum -c
+tar -xf kibana-$KIBANA_VERSION-linux-x64.tar.gz -C $ROOTFS/opt --strip-components 1
+
+rm -rf $ROOTFS/opt/src/node $ROOTFS/opt/src/bin
 
 cd $ROOTFS
 tar -cf $OUT/rootfs.tar .
@@ -41,7 +34,18 @@ FROM scratch
 
 ADD rootfs.tar /
 
-ENTRYPOINT [ "/bin/haproxy-systemd-wrapper", "-p", "/var/run/haproxy.pid" ]
-CMD        [ "-f", "/etc/haproxy.cfg" ]
+RUN apk add --no-cache nodejs
+
+COPY build/src /opt/kibana
+
+ENV NODE_ENV=production
+
+USER nobody
+
+EXPOSE 5601
+
+WORKDIR /opt/kibana
+
+ENTRYPOINT ["/usr/bin/node", "src/cli"]
 
 EOF

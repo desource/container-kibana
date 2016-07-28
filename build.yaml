@@ -7,14 +7,11 @@ image_resource:
     repository: quay.io/desource/alpine-build
 
 inputs:
-  - name: haproxy-src
+  - name: kibana-src
     path: src
-  - name: lua-build
-  - name: libslz-build
-  - name: libressl-build
 
 outputs:
-  - name: haproxy-build
+  - name: kibana-build
   
 run:
   path: ./src/build.sh
