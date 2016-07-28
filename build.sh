@@ -19,13 +19,13 @@ tar -xf rootfs.tar.gz -C $ROOTFS
 mv $ROOTFS/etc/localtime $ROOTFS/usr/share/zoneinfo
 ln -s /usr/share/zoneinfo $ROOTFS/etc/localtime 
 
-mkdir -p $ROOTFS/opt
+mkdir -p $ROOTFS/opt/kibana
 cd $BASE
 curl -sL https://download.elastic.co/kibana/kibana/kibana-$KIBANA_VERSION-linux-x64.tar.gz -o kibana-$KIBANA_VERSION-linux-x64.tar.gz
 echo "$KIBANA_SHA1  kibana-$KIBANA_VERSION-linux-x64.tar.gz" | sha1sum -c
-tar -xf kibana-$KIBANA_VERSION-linux-x64.tar.gz -C $ROOTFS/opt --strip-components 1
+tar -xf kibana-$KIBANA_VERSION-linux-x64.tar.gz -C $ROOTFS/opt/kibana --strip-components 1
 
-rm -rf $ROOTFS/opt/src/node $ROOTFS/opt/src/bin
+rm -rf $ROOTFS/opt/kibana/src/node $ROOTFS/opt/kibana/src/bin
 
 cd $ROOTFS
 tar -cf $OUT/rootfs.tar .
@@ -36,8 +36,6 @@ FROM scratch
 ADD rootfs.tar /
 
 RUN apk add --no-cache nodejs
-
-COPY build/src /opt/kibana
 
 ENV NODE_ENV=production
 
