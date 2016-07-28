@@ -25,7 +25,7 @@ curl -sL https://download.elastic.co/kibana/kibana/kibana-$KIBANA_VERSION-linux-
 echo "$KIBANA_SHA1  kibana-$KIBANA_VERSION-linux-x64.tar.gz" | sha1sum -c
 tar -xf kibana-$KIBANA_VERSION-linux-x64.tar.gz -C $ROOTFS/opt/kibana --strip-components 1
 
-rm -rf $ROOTFS/opt/kibana/src/node $ROOTFS/opt/kibana/src/bin
+rm -rf $ROOTFS/opt/kibana/node $ROOTFS/opt/kibana/bin
 
 cd $ROOTFS
 tar -cf $OUT/rootfs.tar .
