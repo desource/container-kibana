@@ -1,8 +1,6 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 set -eux
 
-# KIBANA_VERSION=4.5.1
-# KIBANA_SHA1=355c631b77c529d3dea304d7f084e658f5cc3123
 KIBANA_VERSION=4.5.4
 KIBANA_SHA1=dba409384fe36f1b5ad20e7dd7e6efacdc09ed11
 
@@ -24,8 +22,13 @@ chown -R nobody:root $ROOTFS/opt/kibana/optimize
 cd $ROOTFS
 tar -cf $OUT/rootfs.tar .
 
+
+cat <<EOF > $OUT/version
+${KIBANA_VERSION}
+EOF
+
 cat <<EOF > $OUT/Dockerfile
-FROM quay.io/desource/nodejs
+FROM quay.io/desource/nodejs:6
 
 ADD rootfs.tar /
 
